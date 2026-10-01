@@ -31,11 +31,12 @@ export function generateDemo() {
     let h = r < (weekendNight ? 0.5 : 0.74) ? goal + rnd(0, 1.7) : r < 0.9 ? goal - rnd(0.3, 1.4) : goal - rnd(1.6, 3.2);
     h = clamp(h, Math.min(11.5, goal - 1), goal + 2.4);
     const end = roundMin(start + h * HOUR);
-    const f: FastingSession = { id: uid(), start: roundMin(start), end: end > now ? null : end, goalH: goal, demo: true };
+    // Örnek veriler yalnızca tamamlanmış geçmiş oruçları içerir. Devam eden bir oruç asla
+    // örnek olarak oluşturulmaz; böylece kullanıcının gerçek orucuyla karışmaz.
+    if (end > now) continue;
+    const f: FastingSession = { id: uid(), start: roundMin(start), end, goalH: goal, demo: true };
     D.fasts.push(f); byStart[dayKey(day)] = f;
   }
-  const actives = D.fasts.filter(f => !f.end);
-  actives.slice(0, -1).forEach(f => (f.end = Math.min(now - 2 * HOUR, f.start + goal * HOUR)));
 
   for (let d = 30; d >= 0; d--) {
     const day = addDays(today, -d), k = dayKey(day), weekend = day.getDay() === 0 || day.getDay() === 6;
